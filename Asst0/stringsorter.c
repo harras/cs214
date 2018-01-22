@@ -25,14 +25,26 @@ int main(int argc, char *argv[]) {
 	end = argv[1];
 
 	// Main loop of the program, iterates over the input string and sorts each scanned word
+	// NOTE TO SELF: Revise this, it's clunky
 	while(*end != '\0'){
-		while(!is_alpha(*end)){
-			memcpy(word, front, (end-front));		
-			printf("%s\n", word);
+		while(!is_alpha(*end) && *end != '\0'){
+			if(is_alpha(*front)){
+				memset(word, '\0', sizeof(word));
+				memcpy(word, front, (end-front));		
+				printf("%s\n", word);
+				front = end;
+			}
+			front++;
 			end++;
 		}
-		end++;
+		if(*end != '\0')
+			end++;
 	}
-
+	if(is_alpha(*front)){
+		memset(word, '\0', sizeof(word));
+		memcpy(word, front, (end-front));
+		printf("%s\n", word);
+	}
+	
 	exit(0);
 }
