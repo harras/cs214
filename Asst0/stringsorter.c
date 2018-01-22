@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     //Declares and itializes pointers that scan the input string
 	char *front;
     char *end;
-    char word[sizeof(argv[1])];
+    char word[strlen(argv[1])];
 	front = argv[1];
 	end = argv[1];
 
@@ -45,6 +45,6 @@ int main(int argc, char *argv[]) {
 		memcpy(word, front, (end-front));
 		printf("%s\n", word);
 	}
-	
+
 	exit(0);
 }
