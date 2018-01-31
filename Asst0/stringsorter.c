@@ -8,78 +8,75 @@ struct Node {
 	struct Node *next;
 };
 
+struct Node *head = NULL;
+
 char * lower_all(char *str){
 	for(int i = 0; str[i]; i++){
   		str[i] = tolower(str[i]);
 	}
 }
 
+// Returns 1 if a string goes before -- or is the same string as -- another alphabetically.
+// BUG: 'hello, hell' returns a 1. 
 int goes_before(char *str1, char *str2){
-	printf("RUNNING: goes_before\n");
-	printf("str1: %s, str2: %s\n", str1, str2);
-	
 	while(*str1 != '\0' && *str2 != '\0'){
-		printf("str1: %c, str2: %c\n", *str1, *str2);
-		if(atoi(str1) < atoi(str2)){
-			printf("RETURNING...\n");
+		if((int) *str1 < (int) *str2){
 			return 1;
 		}
-		else if(atoi(str1) == atoi(str2)){
+		else if((int) *str1 > (int) *str2){
+			return 0;
+		}
+		else if((int) *str1 == (int) *str2){
 			str1++;
 			str2++;
 		}
 		else{
-			printf("I don't know what went wrong, fam\n");
 			break;
 		}
 	}
-	printf("RETURNING...\n");
-	return 0;
+	return 1;
 }
 
-void insert(struct Node **n_ptr, char *word){
-	printf("RUNNING: insert\n");
+void insert(char *word){
 
 	struct Node *new_node = (struct Node *) malloc(sizeof(struct Node));
-	struct Node *temp = *n_ptr;
+	struct Node *temp = head;
+
+	new_node->str = malloc(strlen(word) + 1);
+	strcpy(new_node->str, word);
 	
-	new_node->str = word;
 	new_node->next = NULL;
 
-	if (*n_ptr == NULL){
-		printf("1.\n");
-		*n_ptr = new_node;
-		printf("RETURNING...\n");
+	if (head == NULL){
+		head = new_node;
 		return;
 	}
 
-	printf("n_ptr: %s\n", (*n_ptr)->str);
-
-	if(goes_before(new_node->str, (*n_ptr)->str)){
-		printf("2.\n");
-		new_node->next = (*n_ptr);
-		(*n_ptr) = new_node;
-		printf("RETURNING...\n");
+	if(goes_before(new_node->str, head->str)){
+		new_node->next = head;
+		head = new_node;
 		return;
 	}
 
 	while(temp->next != NULL){
-		printf("3.\n");
 		if(!goes_before(new_node->str, temp->str) && 
 			(goes_before(new_node->str, temp->next->str))){
 			new_node->next = temp->next;
 			temp->next = new_node;
-			printf("RETURNING...\n");
 			return;
 		}
 		temp = temp->next;
 	}
 
-	printf("RETURNING UNEXPECTEDLY...\n");
+	if(goes_before(temp->str, new_node->str)){
+		temp->next = new_node;
+		return;
+	}
 }
 
-void print_list(struct Node *n){
-	printf("RUNNING: print_list\n");
+void print_list(){
+	struct Node *n = head;
+
 	while(n != NULL){
 		printf("%s\n", n->str);
 		n = n->next;
@@ -101,40 +98,30 @@ int main(int argc, char *argv[]) {
 	front = argv[1];
 	end = argv[1];
 
-	// Declares Linked List pointers
-	struct Node *head = NULL;
-
 	// Main loop of the program, iterates over the input string and sorts each scanned word
 	// NOTE TO SELF: Revise this, it's clunky
 	while(*end != '\0'){
-		//printf("''''''''''''''''\n");
-		//print_list(head);
-		//printf("................\n");
 		while(!isalpha(*end) && *end != '\0'){
 			if(isalpha(*front)){
 				memset(word, '\0', sizeof(word));
 				memcpy(word, front, (end-front));		
-				printf("%s\n", word);
-				printf("-----------\n");
-				insert(&head, word);
-				printf("head: %s", head->str);
+				insert(word);
 				front = end;
 			}
 			front++;
 			end++;
 		}
-		if(*end != '\0')
+		if(*end != '\0'){
 			end++;
+		}
 	}
 	if(isalpha(*front)){
 		memset(word, '\0', sizeof(word));
 		memcpy(word, front, (end-front));
-		printf("%s\n", word);
-		printf("===========\n");
-		insert(&head, word);
+		insert(word);
 	}
 
-	print_list(head);
+	print_list();
 
 	return(0);
 }
