@@ -30,8 +30,7 @@ static char myblock[5000];
 }*/
 
 // improvement on malloc
-// Returns a void* pointer for valid requests or "NULL" for 
-// invalid requests. Prints calling file and line of invalid request
+// Returns a void* pointer for valid requests or "NULL" for invalid requests. Prints calling file and line of invalid request
 void* mymalloc(int memRequest, char* filename, int line){
 	
 	// The 4 bytes at the 0 index are a dummy header with a pointer to the 4 index and 0 memory allocated
@@ -44,7 +43,7 @@ void* mymalloc(int memRequest, char* filename, int line){
 	
 	// if the request exceeds maximum available memory, does not try to allocate
 	if((memRequest+4)>5000){
-		printf("\nExcessive memory request error at %s, line %d",filename, line);
+		printf("\nExcessive memory request error at %s, line %d", filename, line);
 		return NULL;
 	}
 	
