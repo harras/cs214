@@ -11,23 +11,17 @@
  *  index of next header    # of mem bytes in this block             bytes of mem allocated
  **/
 
+
 //the amount of memory available before the next pointer: pointer-4+(next-memory)
 #include "mymalloc.h"
 static char myblock[5000];
 
 // dummy function used to debug random things: to be removed before submitting
-/*void trythis(){
-	short blerp=17;
-	myblock[0]=blerp;
-	blerp=38;
-	myblock[2]=blerp;
-	short* blerptr= (short*) &myblock[0];
-	printf("%d\n",*blerptr);
-	blerptr= (short*) &myblock[2];
-	printf("%d\n",*blerptr);
-	blerptr= (short*) &myblock[1];
-	printf("%d\n",*blerptr);
-}*/
+void trythis(){
+	char* blerptr=&myblock[0];
+	long blerp=(long) blerptr;
+	printf("\narray starts at %ld\n",blerp);
+}
 
 // improvement on malloc
 // Returns a void* pointer for valid requests or "NULL" for invalid requests. Prints calling file and line of invalid request
@@ -103,13 +97,13 @@ void myfree(void* memptr, char* filename, int line){
 	}
 
 	// iterates through to find the correct chunk of memory
-	while(freeIndex>(short) myblock[index] && freeIndex!=index+4){
+	while(freeIndex>(short) myblock[index] && freeIndex!=index+4 && myblock[prev]!=0){
 		prev=index;
 		index=myblock[index];		
 	}
 
 	// Case: pointer was an address between two valid pointers (index has passed the pointer). Not a valid operation
-	if(index>freeIndex){
+	if(index>freeIndex || myblock[prev]==0){
 		printf("Attempts to free invalid pointer at %s line %d",filename, line);
 		return;
 	}

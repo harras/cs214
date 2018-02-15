@@ -7,6 +7,6 @@
 #define free(x) myfree(x,__FILE__,__LINE__)
 void* mymalloc(int memRequest, char* filenmane, int line);
 void myfree(void* memptr, char* filename, int line);
-//void trythis();
+void trythis();
 
 #endif //end of MYMALLOC
