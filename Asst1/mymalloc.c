@@ -93,7 +93,7 @@ void myfree(void* memptr, char* filename, int line){
 	// Case: not a valid pointer to our dynamic memory
 	if(freeIndex<0 || freeIndex>5000){
 		printf("Attempts to free a type other than pointer at %s line %d",filename, line);
-		return;
+		return NULL;
 	}
 
 	// iterates through to find the correct chunk of memory
@@ -105,7 +105,7 @@ void myfree(void* memptr, char* filename, int line){
 	// Case: pointer was an address between two valid pointers (index has passed the pointer). Not a valid operation
 	if(index>freeIndex || myblock[prev]==0){
 		printf("Attempts to free invalid pointer at %s line %d",filename, line);
-		return;
+		return NULL;
 	}
 
 	if(freeIndex==index+4){
