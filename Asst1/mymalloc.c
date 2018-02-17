@@ -47,7 +47,9 @@ void* mymalloc(int memRequest, char* filename, int line){
 	
 	// Finds first chunk of memory large enough
 	// either gets to the end of allocated memory or there is sufficient free memory before the next to squeeze in a block
+	int count = 0;
 	while(myblock[currindex]!=0 && (myblock[currindex]-(currindex+4+memRequest))<(memRequest+4) ){
+		printf("%d...\t currindex: %hd\n", count++, currindex);
 		currindex=myblock[currindex];
 	}
 	
@@ -93,7 +95,7 @@ void myfree(void* memptr, char* filename, int line){
 	// Case: not a valid pointer to our dynamic memory
 	if(freeIndex<0 || freeIndex>5000){
 		printf("Attempts to free a type other than pointer at %s line %d",filename, line);
-		return NULL;
+		return;
 	}
 
 	// iterates through to find the correct chunk of memory
@@ -105,7 +107,7 @@ void myfree(void* memptr, char* filename, int line){
 	// Case: pointer was an address between two valid pointers (index has passed the pointer). Not a valid operation
 	if(index>freeIndex || myblock[prev]==0){
 		printf("Attempts to free invalid pointer at %s line %d",filename, line);
-		return NULL;
+		return;
 	}
 
 	if(freeIndex==index+4){

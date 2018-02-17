@@ -12,11 +12,13 @@ int main(int argc, char* argv[]){
 	gettimeofday(&start, NULL);
 	void * ptrs[150];
 	for(int i = 0; i < 150; i++){
-		printf("%d...\n", i);
-		ptrs[i] = mymalloc(1, __FILE__, __LINE__);
+		if(i < 101){	
+			printf("\n%d...\n\n", i);
+			ptrs[i] = mymalloc(1, __FILE__, __LINE__);
+		}
 	}
 	for(int i = 0; i < 150; i++){
-		printf("%d...\n", i);
+		//printf("%d...\n", i);
 		myfree(ptrs[i], __FILE__, __LINE__);
 	}
 	gettimeofday(&end, NULL);
