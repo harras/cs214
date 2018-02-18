@@ -1,8 +1,3 @@
-
-#include <time.h>
-#include <sys/time.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include "mymalloc.h"
 
 
@@ -47,15 +42,10 @@ int main(int argc, char* argv[]){
 	int count = 0;
 	for(i = 0; i < 150; i++){
 		int r = rand()%2;
-		//if(r == 0){
-		//	ptrs[count++] = mymalloc(1, __FILE__, __LINE__);
-		//}
-		
-		void * hi = mymalloc(1, __FILE__, __LINE__);
-		myfree(hi, __FILE__, __LINE__);
-		myfree(hi, __FILE__, __LINE__);	//should have error pintout here
-
-		/*else*/  if(r == 1 && count < 0){
+		if(r == 0){
+			ptrs[count++] = mymalloc(1, __FILE__, __LINE__);
+		}
+		else  if(r == 1 && count < 0){
 			myfree(ptrs[count--], __FILE__, __LINE__);
 		}
 		else{
