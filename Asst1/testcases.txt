@@ -16,8 +16,8 @@ code...
 --- The case of attempting to allocate memory outside of myblock[]. This 
 	results in an error message.
 
---- The case of attempting to allocate a non-pointer within the scope of 
-	myblock[]. This, too, simply results in an error message.
+--- The case of attempting to free a non-pointer within the scope of myblock[]. 
+	This, too, simply results in an error message.
 
 ---	The case that the user free()s all the nodes, then malloc()s new memory. In
 	part, the purpose of the dummy header. A bug fix involved making sure the
