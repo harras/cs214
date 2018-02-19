@@ -114,7 +114,20 @@ int main(int argc, char* argv[]){
 	printf("Test E... Average time per workload:\t%.0fus\n", elapsed/100); 
 	
 	// F: demonstrates the allocation of large blocks of memory
-
+	gettimeofday(&start, NULL);
+	for(x=0; x<100; x++){
+		int ** more=(int **) malloc(sizeof(int*)*4);
+		for(i=0; i<4; i++){
+			more[i] = (int *) malloc(sizeof(int*)*200); //good for 200 ints
+		}
+		for(i=0; i<4; i++){ 
+			free(more[i]);
+		}
+		free(more);
+	}
+	gettimeofday(&end, NULL);
+	elapsed = (end.tv_usec - start.tv_usec);
+	printf("Test F... Average time per workload:\t%.0fus\n", elapsed/100); 
 
     return 0;
 }

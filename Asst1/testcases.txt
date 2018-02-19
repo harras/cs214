@@ -14,41 +14,41 @@ The following are a list of edge cases we looked for/found while debugging our
 code...
 
 --- The case of attempting to allocate memory outside of myblock[]. This 
-	results in an error message.
+    results in an error message.
 
 --- The case of attempting to free a non-pointer within the scope of myblock[]. 
-	This, too, simply results in an error message.
+    This, too, simply results in an error message.
 
----	The case that the user free()s all the nodes, then malloc()s new memory. In
-	part, the purpose of the dummy header. A bug fix involved making sure the
-	dummy pointer is reset to pointing to first availible point of memory when
-	this occurs. 
+--- The case that the user free()s all the nodes, then malloc()s new memory. In
+    part, the purpose of the dummy header. A bug fix involved making sure the
+    dummy pointer is reset to pointing to first availible point of memory when
+    this occurs. 
 
----	The case were the dummy pointer points to a null node. Again, this is 
-	resolved by being sure to modify the pointer values.
+--- The case were the dummy pointer points to a null node. Again, this is 
+    resolved by being sure to modify the pointer values.
 
 --- The case where the allocated memory block between the dummy metadata and 
-	another block is freed. Again, fixed by making sure the dummy pointer 
-	updates its data like the rest of the metadata.
+    another block is freed. Again, fixed by making sure the dummy pointer 
+    updates its data like the rest of the metadata.
 
----	Allocating as many small bits of memory as possible -- until the memory 
-	runs out. This initually resulted in a short int (data type of the metadata
-	poitners) overflow, in turn resulting in negative indexes. This caused out
-	of bounds memory to be accessed (memory addresses before myblock[]).
+--- Allocating as many small bits of memory as possible -- until the memory 
+    runs out. This initually resulted in a short int (data type of the metadata
+    poitners) overflow, in turn resulting in negative indexes. This caused out
+    of bounds memory to be accessed (memory addresses before myblock[]).
 
-	This had the compounding error of overflowing to the point where memory at
-	myblock[1] had the pointer index value of 1, leading to an infinite loop.
+    This had the compounding error of overflowing to the point where memory at
+    myblock[1] had the pointer index value of 1, leading to an infinite loop.
 
-	This was resolved by converting the pointer indexes to unsigned shorts.
+    This was resolved by converting the pointer indexes to unsigned shorts.
 
 
 The following explain the cases we specifically tested in memgrind, for steps E
 and F...
 
 --- For E, we assigned our allocated memory with arbitrary values, to 
-	demonstrate that it is actually functional. 
+    demonstrate that it is actually functional. 
 
 --- For F, we allocated large of chunks of memory, in part to look for an edge
-	case. As the program's structure would suggest, there were no errors. 
-	Ultimately, this was just a way to allocate all of myblock[]'s memory much
-	more quickly.
+    case. As the program's structure would suggest, there were no errors. 
+    Ultimately, this was just a way to allocate all of myblock[]'s memory much
+    more quickly.
