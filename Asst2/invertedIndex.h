@@ -1,9 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <dirent.h>
-#include <fcntl.h>
-
 typedef struct wordNode wordNode;
 typedef struct fileNode fileNode;
 //typedef struct dirNode dirNode;

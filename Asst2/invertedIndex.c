@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <unistd.h>
 #include <fcntl.h>
 
 char wordHolder[50];
@@ -25,7 +26,7 @@ int main(int argc, char* argv[]){
 	invIndex=(wordNode**) calloc(26,sizeof(wordNode*));
 	//Case: directory
 	if(inputString[0]=='.' || inputString[0]=='/'){
-		valid=processDir(inputString);
+		//valid=processDir(inputString);
 	}
 	//case: single file
 	else{
@@ -52,18 +53,17 @@ int main(int argc, char* argv[]){
 int processFile(char* inName){
 	char* currChar=(char*) malloc(3*sizeof(char));
 	memset(wordHolder,0,50);
-	ssize_t readVal;
-	size_t bytesRead=sizeof(char);
+	int readVal;
 	char tempChar;
 	int inFD=open(inName, O_RDONLY);
 	if(inFD<0){
 		return(0);
 	}
-	int notBlank=0;
+	int notBlank=0;\
 	while(1){
 		int tokenLength=0;
 		while(1){
-			readVal=read(inFD,&currChar,bytesRead);	
+			readVal=read(inFD,currChar,1);	
 			if(readVal>=0){
 				if(notBlank==0){
 					notBlank=1;
@@ -246,10 +246,9 @@ int saveInvertedIndex(char* outName){
 			//iterates through each branching file node and prints
 			while(fileNodePtr!=NULL){
 				write(outFD,"\t\t<file name=\"",14);
-				itoa(fileNodePtr->count,buffer,10);
 				write(outFD,fileNodePtr->nodeFile,strlen(fileNodePtr->nodeFile));
 				write(outFD,"\">",2);
-				itoa(fileNodePtr->count,buffer,10);
+				sprintf(buffer,"%d",fileNodePtr->count);
 				write(outFD,buffer,strlen(buffer));
 				write(outFD,"</file>\n",8);
 				fileNodePtr=fileNodePtr->nextFile;
