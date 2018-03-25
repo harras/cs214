@@ -1,18 +1,6 @@
 #include "invertedIndex.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <fcntl.h>
-
-char wordHolder[50];
-char buffer[20];
-char buffer2[20];
-wordNode** invIndex; 
 
 int main(int argc, char* argv[]){
-	int response;
 	if(argc!=3){
 		printf("\ninvalid arguments\n");
 		return(0);
@@ -20,13 +8,22 @@ int main(int argc, char* argv[]){
 	char* outputFile=argv[1];
 	char* inputString=argv[2];
 	int valid=1;
-
+	char* wordHolder[50];
+	int inFD,outFD, key, cmp,bucket,readVal,tokenLength,notBlank,dirFD;
+	wordNode* wordNodePtr;
+	wordNode* tempWordPtr;
+	wordNode* prevWordPtr;
+	fileNode* fileNodePtr;	
+	fileNode* prevFilePtr;
+	fileNode* tempFilePtr;
+	char* token;
+	char* currChar=malloc(3);
 	//initializes Hash Table: current scheme is one bucket for each letter of the alphabet
 	//Array of node pointers
-	invIndex=(wordNode**) calloc(26,sizeof(wordNode*));
+	wordNode** invIndex=(wordNode**) calloc(26*sizeof(wordNode*));
 	//Case: directory
-	if(inputString[0]=='.' || inputString[0]=='/'){
-		//valid=processDir(inputString);
+	if(inputName[0]=='.' || inputName[0]=='/'){
+		valid=processDir(inputString);
 	}
 	//case: single file
 	else{
@@ -34,10 +31,7 @@ int main(int argc, char* argv[]){
 	}
 	//prints output
 	if(valid==1){
-		response=saveInvertedIndex(outputFile);
-		if(response==0){
-			return(0);
-		}
+		saveInvertedIndex(outputFile);
 	}
 	else{
 		printf("error");
@@ -45,23 +39,20 @@ int main(int argc, char* argv[]){
 	return(0);
 }
 
-/*int processDir(char* dirString){
-	DIR* dirFD=opendir(dirString);
-	return(0);
-}*/
+int processDir(char* dirString){
+	dirFD=opendir(dirString);
+	
+}
 
 int processFile(char* inName){
-	char* currChar=(char*) malloc(3*sizeof(char));
 	memset(wordHolder,0,50);
-	int readVal;
-	char tempChar;
-	int inFD=open(inName, O_RDONLY);
+	inFD=open(inName, O_RDONLY);
 	if(inFD<0){
 		return(0);
 	}
-	int notBlank=0;\
+	notBlank=0;
 	while(1){
-		int tokenLength=0;
+		tokenLength=0;
 		while(1){
 			readVal=read(inFD,currChar,1);	
 			if(readVal>=0){
@@ -74,14 +65,11 @@ int processFile(char* inName){
 			}
 			//ensures it is a lowercase letter or if not the first character, a number
 			if(currChar[0]>='a' && currChar[0]<='z'){
-				tempChar=currChar[0];
-				wordHolder[tokenLength]=tempChar;
+				wordHolder[tokenLength]=currChar[0];
 				++tokenLength;
 			}
 			else if(currChar[0]>='A' && currChar[0]<='Z'){
-				tempChar=currChar[0];
-				tempChar=tempChar-'A'+'a';
-				wordHolder[tokenLength]=tempChar;
+				wordHolder[tokenLength]=currChar[0]-'A'+'a';
 				++tokenLength;
 			}
 			else if(currChar[0]>='0' && currChar[0]<='9' && tokenLength>0){
@@ -92,7 +80,7 @@ int processFile(char* inName){
 				break;
 			}		
 		}
-		//if the token isn't empty, sets the terminal character and inserts
+		//if the token isn't empty, sets the terminal character and inserts that shit
 		if(tokenLength>0){
 			wordHolder[tokenLength]='\0';
 			insertWord(wordHolder,inName);
@@ -107,19 +95,17 @@ int processFile(char* inName){
 	return(notBlank);
 }
 void insertWord(char* insertStr,char* fileName){
-	int cmp;
-	wordNode* tempWordPtr;
-	int key=insertStr[0]-'a';
-	wordNode* wordNodePtr=invIndex[key];
-	wordNode* prevWordPtr=NULL;
+	key=insertStr[0]-'a';
+	wordNodePtr=invIndex[key];
+	prevWordPtr=NULL;
 	//Case: new linkedlist in an empty bucket
 	if(wordNodePtr==NULL){
-		invIndex[key]=(wordNode*) malloc(sizeof(wordNode));
+		invIndex[key]=(node*) malloc(sizeof(node));
 		//makes new strings and saves them so I can free the ones I passed (for cases where new nodes aren't being made)
 		invIndex[key]->nodeString=(char*) malloc(strlen(insertStr)+1);
 		memcpy(invIndex[key]->nodeString,insertStr,strlen(insertStr)+1);
 		//initializes a branched off file node, sets the count to 1
-		invIndex[key]->nextFile=(fileNode*) malloc(sizeof(fileNode));
+		invIndex[key]->nextFile=(fileNode*) mallloc(sizeof(fileNode));
 		invIndex[key]->nextFile->count=1;
 		//Makes a new string for the file name so I can free the parameter and not run out of RAM
 		invIndex[key]->nextFile->nodeFile=(char*) malloc(strlen(fileName)+1);
@@ -129,7 +115,7 @@ void insertWord(char* insertStr,char* fileName){
 	cmp=strcmp(insertStr,wordNodePtr->nodeString);
 	//Case: first node matches
 	if(cmp==0){
-		insertFile(fileName, wordNodePtr);
+		insertFilePtr(fileName, wordNodePtr);
 		return;
 	}
 	//Case: word comes before first node
@@ -146,19 +132,19 @@ void insertWord(char* insertStr,char* fileName){
 		invIndex[key]=tempWordPtr;
 	}
 	//Otherwise: finds the node or the spot where the node should be
-	while(wordNodePtr->nextWord!=NULL && strcmp(insertStr,wordNodePtr->nodeString)==1){
+	while(wordNodePtr->next!=NULL && strcmp(insertStr,wordNodePtr->nodeFile)==1){
 		prevWordPtr=wordNodePtr;
-		wordNodePtr=wordNodePtr->nextWord;
+		wordNodePtr=wordNodePtr->nextFile;
 	}	
 	//Case: found the relevant node
-	if(strcmp(insertStr,wordNodePtr->nodeString)==0){
-		insertFile(fileName,wordNodePtr);
+	if(strcmp(insertStr,wordNodePtr->nodeFile)==0){
+		insertFilePtr(fileName,wordNodePtr);
 		return;
 	}
 	//Case: need to insert a new word node between two others
 	tempWordPtr=(wordNode*) malloc(sizeof(wordNode));
 	tempWordPtr->nextWord=wordNodePtr;
-	prevWordPtr->nextWord=tempWordPtr;
+	prevWodePtr->nextFile=tempWordPtr;
 	//makes a new string and saves the word entered
 	tempWordPtr->nodeString=(char*) malloc(strlen(insertStr)+1);
 	memcpy(tempWordPtr->nodeString,insertStr,strlen(insertStr)+1);
@@ -170,14 +156,11 @@ void insertWord(char* insertStr,char* fileName){
 	return;
 }
 
-void insertFile(char* fileName,wordNode* wnp){
-	fileNode* fileNodePtr;	
-	fileNode* prevFilePtr;
-	fileNode* tempFilePtr;
+void insertFile(char* fileName,wordNode wnp){
 	fileNodePtr=wnp->nextFile;
 	prevFilePtr=NULL;
 	//finds the relevant file
-	while(fileNodePtr->nextFile!=NULL && strcmp(fileName,fileNodePtr->nodeFile)!=0){
+	while(fileNodePtr->next!=NULL && strcmp(fileName,fileNodePtr->nodeFile)!=0){
 		prevFilePtr=fileNodePtr;
 		fileNodePtr=fileNodePtr->nextFile;
 	}
@@ -218,20 +201,7 @@ void insertFile(char* fileName,wordNode* wnp){
 	return;
 }
 
-int saveInvertedIndex(char* outName){
-	fileNode* fileNodePtr;
-	wordNode* wordNodePtr;
-	int bucket;
-	int response;
-	int outFD=open(outName, O_RDONLY);
-	if(outFD!=-1){
-		printf("Are you sure you want to overwrite the file %s?\nEnter 1 to proceed, or 0 to terminate",outName);
-		scanf("%d",&response);
-		if(response==0){
-			printf("\nterminating execution");
-			return(0);
-		}
-	}
+void saveInvertedIndex(char* outName){
 	outFD=open(outName, O_RDWR | O_CREAT);
 	write(outFD, "<?xml version=\"1.0\"encoding=\"UTF-8\"?>\nfileIndex\n",48);
 	//cycles through each slot of the hash table
@@ -248,8 +218,7 @@ int saveInvertedIndex(char* outName){
 				write(outFD,"\t\t<file name=\"",14);
 				write(outFD,fileNodePtr->nodeFile,strlen(fileNodePtr->nodeFile));
 				write(outFD,"\">",2);
-				sprintf(buffer,"%d",fileNodePtr->count);
-				write(outFD,buffer,strlen(buffer));
+				write(outFD,itoa(fileNodePtr->count),strlen(itoa(fileNodePtr->count)));
 				write(outFD,"</file>\n",8);
 				fileNodePtr=fileNodePtr->nextFile;
 			}
@@ -259,7 +228,7 @@ int saveInvertedIndex(char* outName){
 	}
 	write(outFD,"</fileIndex>",12);
 	close(outFD);
-	return(1);
+	return;
 }
 
 
