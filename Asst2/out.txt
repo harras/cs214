@@ -1,0 +1,49 @@
+<?xml version="1.0"encoding="UTF-8"?>
+fileIndex
+	<word text="beep">
+		<file name="derp.txt">1</file>
+<<<<<<< HEAD
+		<file name="blerp.txt">1</file>
+	</word>
+	<word text="blah">
+		<file name="leedle.txt">4</file>
+		<file name="derp.txt">2</file>
+		<file name="blerp.txt">2</file>
+	</word>
+	<word text="boop">
+		<file name="leedle.txt">6</file>
+		<file name="derp.txt">3</file>
+		<file name="blerp.txt">3</file>
+	</word>
+	<word text="blerp">
+		<file name="bongo.txt">1</file>
+	</word>
+	<word text="derp">
+		<file name="bongo.txt">1</file>
+	</word>
+	<word text="d98h">
+		<file name="derp.txt">1</file>
+		<file name="blerp.txt">1</file>
+	</word>
+	<word text="merp">
+		<file name="bongo.txt">1</file>
+	</word>
+	<word text="zippadeedooda">
+		<file name="derp.txt">1</file>
+		<file name="blerp.txt">1</file>
+=======
+	</word>
+	<word text="blah">
+		<file name="derp.txt">2</file>
+	</word>
+	<word text="boop">
+		<file name="derp.txt">3</file>
+	</word>
+	<word text="d98h">
+		<file name="derp.txt">1</file>
+	</word>
+	<word text="zippadeedooda">
+		<file name="derp.txt">1</file>
+>>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
+	</word>
+</fileIndex>

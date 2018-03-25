@@ -1,6 +1,32 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "invertedIndex.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+
+char wordHolder[50];
+char buffer[20];
+char buffer2[20];
+wordNode** invIndex; 
+
+
+
+char wordHolder[100];
+char buffer[100];
+char buffer2[100];
+wordNode** invIndex; 
 
 int main(int argc, char* argv[]){
+	int response;
 	if(argc!=3){
 		printf("\ninvalid arguments\n");
 		return(0);
@@ -8,51 +34,216 @@ int main(int argc, char* argv[]){
 	char* outputFile=argv[1];
 	char* inputString=argv[2];
 	int valid=1;
-	char* wordHolder[50];
-	int inFD,outFD, key, cmp,bucket,readVal,tokenLength,notBlank,dirFD;
-	wordNode* wordNodePtr;
-	wordNode* tempWordPtr;
-	wordNode* prevWordPtr;
-	fileNode* fileNodePtr;	
-	fileNode* prevFilePtr;
-	fileNode* tempFilePtr;
-	char* token;
-	char* currChar=malloc(3);
+
 	//initializes Hash Table: current scheme is one bucket for each letter of the alphabet
 	//Array of node pointers
-	wordNode** invIndex=(wordNode**) calloc(26*sizeof(wordNode*));
+	invIndex=(wordNode**) calloc(26,sizeof(wordNode*));
+<<<<<<< HEAD
+	DIR* checkDir=opendir(inputString);
+	//Case: not a directory, must be a file
+	if(checkDir==NULL){
+		valid=processFile(inputString,inputString);
+=======
 	//Case: directory
-	if(inputName[0]=='.' || inputName[0]=='/'){
+	if(inputString[0]=='.' || inputString[0]=='/'){
 		valid=processDir(inputString);
+>>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
 	}
-	//case: single file
 	else{
-		valid=processFile(inputString);
+		closedir(checkDir);
+		processDir(inputString);
 	}
 	//prints output
-	if(valid==1){
-		saveInvertedIndex(outputFile);
+	if(valid!=0){
+		response=saveInvertedIndex(outputFile);
+		if(response==0){
+			return(0);
+		}
 	}
 	else{
-		printf("error");
+		printf("\nerror: invalid input file\n");
 	}
 	return(0);
 }
-
-int processDir(char* dirString){
-	dirFD=opendir(dirString);
-	
+//custom version of builtin strcmp. Returns 0 if equal, -1 if str1 comes first, 1 is str2 comes first
+int customStrCmp(char* str1, char* str2){
+	if(str1==NULL || str2==NULL){
+		//not sure what to do here but I needed some form of error handling
+		return 0;
+	}
+	int strIndex=0;
+	while(str1[strIndex]!='\0' && str2[strIndex]!='\0'){
+		if(str1[strIndex]==str2[strIndex]){
+			++strIndex;
+		}
+		else{
+			//case: str1[index] is a letter
+			if(str1[strIndex]>='a' && str1[strIndex]<='z'){
+				if(str2[strIndex]>='a' && str2[strIndex]<='z'){
+					if(str1[strIndex]>str2[strIndex]){
+						return 1;
+					}
+					//case: str1[index] is a character that comes before str2[index]
+					else return -1;
+				}
+				if((str2[strIndex]>='0' && str2[strIndex]<='9') || str2[strIndex]=='.')
+					return -1;
+			}
+			//case: str1 is a number
+			else if(str1[strIndex]>='0' && str1[strIndex]<='9'){
+				//case: both are numbers, compare
+				if(str2[strIndex]>='0' && str2[strIndex]<='9'){
+					if(str1[strIndex]>str2[strIndex]){
+						return 1;
+					}
+					//case: str1[index] is a character that comes before str2[index]
+					else return -1;
+				}
+				//case: str2[index] is a letter, str1[index] comes before
+				if(str2[strIndex]>='a' && str2[strIndex]<='z'){
+					return 1;
+				}
+				//case: str2[index] is a '.', str1[index] comes before
+				if(str2[strIndex]=='.'){
+					return -1;
+				}				
+			}
+			//case
+			else if(str1[strIndex]=='.'){
+				//case: str2[index] is a letter or number, str1 must then come before
+				if((str2[strIndex]>='0' && str2[strIndex]<='9')||(str2[strIndex]>='a' && str2[strIndex]<='z')){
+					return 1;
+				}
+			}
+			//case: str1[index] or str2[index] is an arbitray character
+			else{
+				return(strcmp(str1,str2));
+			}
+		}
+	}
+	//Case: strings are equal and terminate at the same time
+	if(str1[strIndex]==str2[strIndex]){
+		return 0;
+	}
+	//Case: string one ended first
+	else if(str1[strIndex]=='\0'){
+		return -1;
+	}
+	//Case: string 2 ended first
+	return 1;
 }
 
+//processes the directories using a depth first search of each subtree
+int processDir(char* dirString){
+	DIR* dirFD=opendir(dirString);
+	struct dirent* currItem;
+	//return Val: number of files successfully processed and dumped into the output file
+	int returnVal=0;
+	int holdVal=0;
+<<<<<<< HEAD
+	dirNode* currDir=(dirNode*) malloc(sizeof(dirNode));
+	char* dirNameHolder;
+	char* fileNameHolder;
+	currDir->directory=dirFD;
+	int sz=strlen(dirString)+1;
+	currDir->dirName=(char*) malloc(sz);
+	memcpy(currDir->dirName,dirString,sz);
+	while(currDir!=NULL){
+		//gets next item
+		currItem=readdir(currDir->directory);
+		//case: exhausted this branch of the folder tree
+		if(currItem==NULL){
+			closedir(currDir->directory);
+=======
+	//pointers to traverse the directory node stack
+	dirNode* tempDir;
+	dirNode* currDir=(dirNode*) malloc(sizeof(dirNode));
+	dirNode* headDir=currDir;
+	char* dirNameHolder;
+	currDir->directory=dirFD;
+	currDir->dirName=(char*) malloc(sizeof(dirString));
+	memcpy(currDir->dirName,dirString,sizeof(dirString));
+	while(currDir!=NULL){
+		currItem=readdir(currDir->directory);
+		//case: exhausted this branch of the folder tree
+		if(currItem==NULL){
+			closeDir(currDir->directory);
+>>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
+			free(currDir->dirName);
+			//Case: not done with the entire stack, needs to continue cleaning up
+			if(currDir->prevDirNode!=NULL){
+				currDir=currDir->prevDirNode;
+				free(currDir->nextDirNode);
+				currDir->nextDirNode=NULL;				
+			}
+			//Case: done with entire stack (previous node is null)
+			else{
+				free(currDir);
+				currDir=NULL;
+			}
+		}
+		//Case: something else to process in this branch
+		else if(strcmp(currItem->d_name,".")!=0 && strcmp(currItem->d_name,"..")!=0){
+			//case: found a nested subdirectory
+			if(currItem->d_type==DT_DIR){
+<<<<<<< HEAD
+				dirNameHolder=(char*) malloc(strlen(currDir->dirName)+strlen(currItem->d_name)+2);
+				strcpy(dirNameHolder,currDir->dirName);
+				strcat(dirNameHolder,"/");
+				strcat(dirNameHolder,currItem->d_name);
+=======
+				dirNameHolder=(char*) malloc(sizeof(currDir->dirName)+sizeof(currItem->d_name));
+				memcpy(dirNameHolder,headDir->dirName,strlen(headDir->dirName)+1);
+				strcat(dirNameHolder,"/");
+				strcat(dirNameHolder,tempDir->d_name);
+>>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
+				//opens the path name, adds the node to the stack
+				currDir->nextDirNode=(dirNode*) malloc(sizeof(dirNode));
+				currDir->nextDirNode->prevDirNode=currDir;
+				currDir->nextDirNode->directory=opendir(dirNameHolder);
+				currDir->nextDirNode->dirName=dirNameHolder;
+				currDir=currDir->nextDirNode;
+			}
+			//case: found a text file to process
+			else if(currItem->d_type==DT_REG){
+<<<<<<< HEAD
+				//makes full file path
+				fileNameHolder=(char*) malloc(strlen(currDir->dirName)+2+strlen(currItem->d_name));
+				memcpy(fileNameHolder,currDir->dirName,strlen(currDir->dirName)+1);
+				strcat(fileNameHolder,"/");
+				strcat(fileNameHolder,currItem->d_name);
+
+				holdVal=processFile(fileNameHolder,currItem->d_name);
+=======
+				holdVal=processFile(currItem->d_type);
+>>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
+				returnVal=returnVal+holdVal;
+			}
+		}
+	}
+	return(returnVal);
+}
+
+<<<<<<< HEAD
+int processFile(char* pathName, char* inName){
+=======
 int processFile(char* inName){
+>>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
+	char* currChar=(char*) malloc(3*sizeof(char));
 	memset(wordHolder,0,50);
-	inFD=open(inName, O_RDONLY);
+	int readVal;
+	char tempChar;
+<<<<<<< HEAD
+	int inFD=open(pathName, O_RDONLY);
+=======
+	int inFD=open(inName, O_RDONLY);
+>>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
 	if(inFD<0){
 		return(0);
 	}
-	notBlank=0;
+	int notBlank=0;
 	while(1){
-		tokenLength=0;
+		int tokenLength=0;
 		while(1){
 			readVal=read(inFD,currChar,1);	
 			if(readVal>=0){
@@ -65,11 +256,14 @@ int processFile(char* inName){
 			}
 			//ensures it is a lowercase letter or if not the first character, a number
 			if(currChar[0]>='a' && currChar[0]<='z'){
-				wordHolder[tokenLength]=currChar[0];
+				tempChar=currChar[0];
+				wordHolder[tokenLength]=tempChar;
 				++tokenLength;
 			}
 			else if(currChar[0]>='A' && currChar[0]<='Z'){
-				wordHolder[tokenLength]=currChar[0]-'A'+'a';
+				tempChar=currChar[0];
+				tempChar=tempChar-'A'+'a';
+				wordHolder[tokenLength]=tempChar;
 				++tokenLength;
 			}
 			else if(currChar[0]>='0' && currChar[0]<='9' && tokenLength>0){
@@ -80,7 +274,7 @@ int processFile(char* inName){
 				break;
 			}		
 		}
-		//if the token isn't empty, sets the terminal character and inserts that shit
+		//if the token isn't empty, sets the terminal character and inserts
 		if(tokenLength>0){
 			wordHolder[tokenLength]='\0';
 			insertWord(wordHolder,inName);
@@ -92,80 +286,86 @@ int processFile(char* inName){
 		}
 	}
 	close(inFD);	
+	free(currChar);
 	return(notBlank);
 }
+
+//function creates and allocates a new word node if none currently exists
+wordNode* makeWordNode(char* wordIn,char* fileString){
+		wordNode* wordPtr=(wordNode*) malloc(sizeof(wordNode));
+		//makes new strings and saves them so I can free the ones I passed (for cases where new nodes aren't being made)
+		wordPtr->nodeString=(char*) malloc(strlen(wordIn)+1);
+		memcpy(wordPtr->nodeString,wordIn,strlen(wordIn)+1);
+		//initializes a branched off file node, sets the count to 1
+		wordPtr->nextFile=(fileNode*) malloc(sizeof(fileNode));
+		wordPtr->nextFile->count=1;
+		//Makes a new string for the file name so I can free the parameter and not run out of RAM
+		wordPtr->nextFile->nodeFile=(char*) malloc(strlen(fileString)+1);
+		memcpy(wordPtr->nextFile->nodeFile,fileString,strlen(fileString)+1);
+		return wordPtr;
+}
+
+//Inserts a node corresponding to a token into the hash table
 void insertWord(char* insertStr,char* fileName){
-	key=insertStr[0]-'a';
-	wordNodePtr=invIndex[key];
-	prevWordPtr=NULL;
+	int cmp;
+	int key=insertStr[0]-'a';
+	wordNode* tempWordPtr=NULL;
+	wordNode* wordNodePtr=invIndex[key];
+	wordNode* prevWordPtr=invIndex[key];
 	//Case: new linkedlist in an empty bucket
 	if(wordNodePtr==NULL){
-		invIndex[key]=(node*) malloc(sizeof(node));
-		//makes new strings and saves them so I can free the ones I passed (for cases where new nodes aren't being made)
-		invIndex[key]->nodeString=(char*) malloc(strlen(insertStr)+1);
-		memcpy(invIndex[key]->nodeString,insertStr,strlen(insertStr)+1);
-		//initializes a branched off file node, sets the count to 1
-		invIndex[key]->nextFile=(fileNode*) mallloc(sizeof(fileNode));
-		invIndex[key]->nextFile->count=1;
-		//Makes a new string for the file name so I can free the parameter and not run out of RAM
-		invIndex[key]->nextFile->nodeFile=(char*) malloc(strlen(fileName)+1);
-		memcpy(invIndex[key]->nextFile->nodeFile,fileName,strlen(fileName)+1);
+		invIndex[key]=makeWordNode(insertStr,fileName);
 		return;
 	}
-	cmp=strcmp(insertStr,wordNodePtr->nodeString);
+	cmp=customStrCmp(insertStr,wordNodePtr->nodeString);
 	//Case: first node matches
 	if(cmp==0){
-		insertFilePtr(fileName, wordNodePtr);
+		insertFile(fileName, wordNodePtr);
 		return;
 	}
 	//Case: word comes before first node
 	if(cmp==-1){
-		tempWordPtr=(wordNode*) malloc(sizeof(wordNode));
+		tempWordPtr=makeWordNode(insertStr,fileName);
 		tempWordPtr->nextWord=wordNodePtr;
-		tempWordPtr->nodeString=(char*) malloc(strlen(insertStr)+1);
-		memcpy(tempWordPtr->nodeString,insertStr,strlen(insertStr)+1);
-		//Makes a new file node and set the count to 1
-		tempWordPtr->nextFile=(fileNode*) malloc(sizeof(fileNode));
-		tempWordPtr->nextFile->count=1;
-		tempWordPtr->nextFile->nodeFile=(char*) malloc(strlen(fileName)+1);
-		memcpy(tempWordPtr->nextFile->nodeFile,fileName,strlen(fileName)+1);
 		invIndex[key]=tempWordPtr;
-	}
-	//Otherwise: finds the node or the spot where the node should be
-	while(wordNodePtr->next!=NULL && strcmp(insertStr,wordNodePtr->nodeFile)==1){
-		prevWordPtr=wordNodePtr;
-		wordNodePtr=wordNodePtr->nextFile;
-	}	
-	//Case: found the relevant node
-	if(strcmp(insertStr,wordNodePtr->nodeFile)==0){
-		insertFilePtr(fileName,wordNodePtr);
 		return;
 	}
-	//Case: need to insert a new word node between two others
-	tempWordPtr=(wordNode*) malloc(sizeof(wordNode));
+	//Otherwise: finds the node or the spot where the node should be
+	while(wordNodePtr->nextWord!=NULL && customStrCmp(insertStr,wordNodePtr->nodeString)==1){
+		prevWordPtr=wordNodePtr;
+		wordNodePtr=wordNodePtr->nextWord;
+	}	
+	//Case: found the relevant node
+	if(customStrCmp(insertStr,wordNodePtr->nodeString)==0){
+		insertFile(fileName,wordNodePtr);
+		return;
+	}
+	//Case: hit the last node but the inserted node comes after
+	else if(wordNodePtr->nextWord==NULL){
+		wordNodePtr->nextWord=makeWordNode(insertStr,fileName);
+		return;
+	}
+	//Case: inserted at the end of the file
+	tempWordPtr=makeWordNode(insertStr,fileName);
 	tempWordPtr->nextWord=wordNodePtr;
-	prevWodePtr->nextFile=tempWordPtr;
-	//makes a new string and saves the word entered
-	tempWordPtr->nodeString=(char*) malloc(strlen(insertStr)+1);
-	memcpy(tempWordPtr->nodeString,insertStr,strlen(insertStr)+1);
-	//Makes a new file node, save a copy of the string and set the count to 1
-	tempWordPtr->nextFile=(fileNode*) malloc(sizeof(fileNode));
-	tempWordPtr->nextFile->count=1;
-	tempWordPtr->nextFile->nodeFile=(char*) malloc(strlen(fileName)+1);
-	memcpy(tempWordPtr->nextFile->nodeFile,fileName,strlen(fileName)+1);
+	prevWordPtr->nextWord=tempWordPtr;
 	return;
 }
 
-void insertFile(char* fileName,wordNode wnp){
+//searches for the file node off the relevant word node, inserts or increments accordingly
+void insertFile(char* fileName,wordNode* wnp){
+	fileNode* fileNodePtr;	
+	fileNode* prevFilePtr;
+	fileNode* tempFilePtr;
 	fileNodePtr=wnp->nextFile;
 	prevFilePtr=NULL;
 	//finds the relevant file
-	while(fileNodePtr->next!=NULL && strcmp(fileName,fileNodePtr->nodeFile)!=0){
+	while(fileNodePtr->nextFile!=NULL && customStrCmp(fileName,fileNodePtr->nodeFile)!=0){
 		prevFilePtr=fileNodePtr;
 		fileNodePtr=fileNodePtr->nextFile;
 	}
 	//increments the relevant file, adjusts if the counts are rearranged
-	if(strcmp(fileName,fileNodePtr->nodeFile)==0){
+	if(customStrCmp(fileName,fileNodePtr->nodeFile)==0){
 		fileNodePtr->count=fileNodePtr->count+1;
 		//can't just swap the two because you could have clumps of files with a shared count right before
 		if(prevFilePtr!=NULL && prevFilePtr->count<fileNodePtr->count){
@@ -201,8 +401,26 @@ void insertFile(char* fileName,wordNode wnp){
 	return;
 }
 
-void saveInvertedIndex(char* outName){
-	outFD=open(outName, O_RDWR | O_CREAT);
+int saveInvertedIndex(char* outName){
+	fileNode* fileNodePtr;
+	wordNode* wordNodePtr;
+	int bucket;
+	int response;
+	int outFD=open(outName, O_RDONLY, 00666);
+	if(outFD!=-1){
+<<<<<<< HEAD
+		printf("Are you sure you want to overwrite the file %s?\nEnter 1 to proceed, or 0 to terminate\n",outName);
+=======
+		printf("Are you sure you want to overwrite the file %s?\nEnter 1 to proceed, or 0 to terminate",outName);
+>>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
+		scanf("%d",&response);
+		if(response==0){
+			printf("\nterminating execution");
+			return(0);
+		}
+	}
+	close(outFD);
+	outFD=open(outName, O_RDWR | O_CREAT,00666);
 	write(outFD, "<?xml version=\"1.0\"encoding=\"UTF-8\"?>\nfileIndex\n",48);
 	//cycles through each slot of the hash table
 	for(bucket=0; bucket<26; bucket++){
@@ -218,7 +436,8 @@ void saveInvertedIndex(char* outName){
 				write(outFD,"\t\t<file name=\"",14);
 				write(outFD,fileNodePtr->nodeFile,strlen(fileNodePtr->nodeFile));
 				write(outFD,"\">",2);
-				write(outFD,itoa(fileNodePtr->count),strlen(itoa(fileNodePtr->count)));
+				sprintf(buffer,"%d",fileNodePtr->count);
+				write(outFD,buffer,strlen(buffer));
 				write(outFD,"</file>\n",8);
 				fileNodePtr=fileNodePtr->nextFile;
 			}
@@ -228,7 +447,7 @@ void saveInvertedIndex(char* outName){
 	}
 	write(outFD,"</fileIndex>",12);
 	close(outFD);
-	return;
+	return(1);
 }
 
 

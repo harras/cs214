@@ -1,0 +1,21 @@
+<?xml version="1.0"encoding="UTF-8"?>
+fileIndex
+<<<<<<< HEAD
+=======
+	<word text="beep">
+		<file name="derp.txt">1</file>
+	</word>
+	<word text="blah">
+		<file name="derp.txt">2</file>
+	</word>
+	<word text="boop">
+		<file name="derp.txt">3</file>
+	</word>
+	<word text="d98h">
+		<file name="derp.txt">1</file>
+	</word>
+	<word text="zippadeedooda">
+		<file name="derp.txt">1</file>
+	</word>
+>>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
+</fileIndex>
