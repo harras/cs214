@@ -23,11 +23,7 @@ struct dirNode{
 };
 
 int processDir(char* dirString);
-<<<<<<< HEAD
 int processFile(char* pathName, char* inName);
-=======
-int processFile(char* inName);
->>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
 void insertWord(char* insertStr,char* fileName);
 void insertFile(char* fileName,wordNode* wnp);
 int saveInvertedIndex(char* outName);

@@ -2,7 +2,6 @@
 fileIndex
 	<word text="beep">
 		<file name="derp.txt">1</file>
-<<<<<<< HEAD
 		<file name="blerp.txt">1</file>
 	</word>
 	<word text="blah">
@@ -31,19 +30,5 @@ fileIndex
 	<word text="zippadeedooda">
 		<file name="derp.txt">1</file>
 		<file name="blerp.txt">1</file>
-=======
-	</word>
-	<word text="blah">
-		<file name="derp.txt">2</file>
-	</word>
-	<word text="boop">
-		<file name="derp.txt">3</file>
-	</word>
-	<word text="d98h">
-		<file name="derp.txt">1</file>
-	</word>
-	<word text="zippadeedooda">
-		<file name="derp.txt">1</file>
->>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
 	</word>
 </fileIndex>

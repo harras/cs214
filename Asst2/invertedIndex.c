@@ -5,18 +5,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "invertedIndex.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <fcntl.h>
-
-
-char wordHolder[50];
-char buffer[20];
-char buffer2[20];
-wordNode** invIndex; 
 
 
 
@@ -38,16 +26,10 @@ int main(int argc, char* argv[]){
 	//initializes Hash Table: current scheme is one bucket for each letter of the alphabet
 	//Array of node pointers
 	invIndex=(wordNode**) calloc(26,sizeof(wordNode*));
-<<<<<<< HEAD
 	DIR* checkDir=opendir(inputString);
 	//Case: not a directory, must be a file
 	if(checkDir==NULL){
 		valid=processFile(inputString,inputString);
-=======
-	//Case: directory
-	if(inputString[0]=='.' || inputString[0]=='/'){
-		valid=processDir(inputString);
->>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
 	}
 	else{
 		closedir(checkDir);
@@ -140,7 +122,6 @@ int processDir(char* dirString){
 	//return Val: number of files successfully processed and dumped into the output file
 	int returnVal=0;
 	int holdVal=0;
-<<<<<<< HEAD
 	dirNode* currDir=(dirNode*) malloc(sizeof(dirNode));
 	char* dirNameHolder;
 	char* fileNameHolder;
@@ -154,21 +135,6 @@ int processDir(char* dirString){
 		//case: exhausted this branch of the folder tree
 		if(currItem==NULL){
 			closedir(currDir->directory);
-=======
-	//pointers to traverse the directory node stack
-	dirNode* tempDir;
-	dirNode* currDir=(dirNode*) malloc(sizeof(dirNode));
-	dirNode* headDir=currDir;
-	char* dirNameHolder;
-	currDir->directory=dirFD;
-	currDir->dirName=(char*) malloc(sizeof(dirString));
-	memcpy(currDir->dirName,dirString,sizeof(dirString));
-	while(currDir!=NULL){
-		currItem=readdir(currDir->directory);
-		//case: exhausted this branch of the folder tree
-		if(currItem==NULL){
-			closeDir(currDir->directory);
->>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
 			free(currDir->dirName);
 			//Case: not done with the entire stack, needs to continue cleaning up
 			if(currDir->prevDirNode!=NULL){
@@ -186,17 +152,10 @@ int processDir(char* dirString){
 		else if(strcmp(currItem->d_name,".")!=0 && strcmp(currItem->d_name,"..")!=0){
 			//case: found a nested subdirectory
 			if(currItem->d_type==DT_DIR){
-<<<<<<< HEAD
 				dirNameHolder=(char*) malloc(strlen(currDir->dirName)+strlen(currItem->d_name)+2);
 				strcpy(dirNameHolder,currDir->dirName);
 				strcat(dirNameHolder,"/");
 				strcat(dirNameHolder,currItem->d_name);
-=======
-				dirNameHolder=(char*) malloc(sizeof(currDir->dirName)+sizeof(currItem->d_name));
-				memcpy(dirNameHolder,headDir->dirName,strlen(headDir->dirName)+1);
-				strcat(dirNameHolder,"/");
-				strcat(dirNameHolder,tempDir->d_name);
->>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
 				//opens the path name, adds the node to the stack
 				currDir->nextDirNode=(dirNode*) malloc(sizeof(dirNode));
 				currDir->nextDirNode->prevDirNode=currDir;
@@ -206,7 +165,6 @@ int processDir(char* dirString){
 			}
 			//case: found a text file to process
 			else if(currItem->d_type==DT_REG){
-<<<<<<< HEAD
 				//makes full file path
 				fileNameHolder=(char*) malloc(strlen(currDir->dirName)+2+strlen(currItem->d_name));
 				memcpy(fileNameHolder,currDir->dirName,strlen(currDir->dirName)+1);
@@ -214,9 +172,6 @@ int processDir(char* dirString){
 				strcat(fileNameHolder,currItem->d_name);
 
 				holdVal=processFile(fileNameHolder,currItem->d_name);
-=======
-				holdVal=processFile(currItem->d_type);
->>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
 				returnVal=returnVal+holdVal;
 			}
 		}
@@ -224,20 +179,12 @@ int processDir(char* dirString){
 	return(returnVal);
 }
 
-<<<<<<< HEAD
 int processFile(char* pathName, char* inName){
-=======
-int processFile(char* inName){
->>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
 	char* currChar=(char*) malloc(3*sizeof(char));
 	memset(wordHolder,0,50);
 	int readVal;
 	char tempChar;
-<<<<<<< HEAD
 	int inFD=open(pathName, O_RDONLY);
-=======
-	int inFD=open(inName, O_RDONLY);
->>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
 	if(inFD<0){
 		return(0);
 	}
@@ -408,11 +355,7 @@ int saveInvertedIndex(char* outName){
 	int response;
 	int outFD=open(outName, O_RDONLY, 00666);
 	if(outFD!=-1){
-<<<<<<< HEAD
 		printf("Are you sure you want to overwrite the file %s?\nEnter 1 to proceed, or 0 to terminate\n",outName);
-=======
-		printf("Are you sure you want to overwrite the file %s?\nEnter 1 to proceed, or 0 to terminate",outName);
->>>>>>> c63b2f7fad2a891bb5ed63507c9d12e4a2619fe5
 		scanf("%d",&response);
 		if(response==0){
 			printf("\nterminating execution");
